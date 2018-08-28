@@ -51,13 +51,15 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BasicUnitTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EightNumberQuestion\EightNumberQuestion.csproj">
       <Project>{a7c9f18f-0df9-4e9f-a74d-8d37d025eb52}</Project>
       <Name>EightNumberQuestion</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
