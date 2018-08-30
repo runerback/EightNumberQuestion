@@ -39,7 +39,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomMoveSolver.cs" />
     <Compile Include="RandomMoveWithEmptyCellSolver.cs" />
     <Compile Include="RandomReliableMoveAndReduceHSolver.cs" />
@@ -53,6 +52,9 @@
       <Project>{dcc23a9b-8901-4838-86bd-00410cd3265d}</Project>
       <Name>EightNumberQuestion.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
