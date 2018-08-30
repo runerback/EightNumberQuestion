@@ -1,0 +1,153 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:controls="clr-namespace:EightNumberQuestion.GUI.Controls"
+                    xmlns:util="clr-namespace:Runerback.Utils.Wpf;assembly=Runerback.Utils.Wpf">
+    <Style TargetType="controls:CellPresenter">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:CellPresenter">
+                    <Border 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <Border
+                            BorderThickness="2"
+                            BorderBrush="DodgerBlue"
+                            Margin="1"
+                            Visibility="{TemplateBinding Visibility}">
+                            <Border
+                                x:Name="PART_Border2"
+                                BorderThickness="1"
+                                BorderBrush="Gray"
+                                Margin="2">
+                                <Grid Background="White">
+                                    <TextBlock 
+                                        Text="{Binding Value, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontWeight="SemiBold" />
+                                </Grid>
+                            </Border>
+                        </Border>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Value, RelativeSource={RelativeSource Self}}" Value="0">
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <!--<Setter TargetName="PART_Border2" Property="BorderBrush" Value="Gray" />-->
+                            <Setter TargetName="PART_Border2" Property="BorderThickness" Value="2" />
+                            <Setter TargetName="PART_Border2" Property="Margin" Value="1.3 .7 .7 1.3" />
+                        </Trigger>
+                        <EventTrigger RoutedEvent="MouseLeftButtonDown">
+                            <BeginStoryboard>
+                                <Storyboard 
+                                        Storyboard.TargetName="PART_Border2"
+                                        Storyboard.TargetProperty="Margin">
+                                    <ThicknessAnimation From="1.3 .7 .7 1.3" To="1" Duration="0" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeftButtonUp">
+                            <BeginStoryboard>
+                                <Storyboard 
+                                        Storyboard.TargetName="PART_Border2"
+                                        Storyboard.TargetProperty="Margin">
+                                    <ThicknessAnimation From="1" To="1.3 .7 .7 1.3" Duration="0" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="controls:BoardPresenter">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:BoardPresenter">
+                    <ControlTemplate.Resources>
+                        <util:BindingDataGizmo 
+                            x:Key="CellSize"
+                            Data="{x:Static controls:BoardPresenter.SIZE}" />
+
+                        <Style TargetType="controls:CellPresenter" BasedOn="{StaticResource {x:Type controls:CellPresenter}}">
+                            <Setter Property="Width" Value="{Binding Data, Source={StaticResource CellSize}}" />
+                            <Setter Property="Height" Value="{Binding Data, Source={StaticResource CellSize}}" />
+                        </Style>
+                    </ControlTemplate.Resources>
+                    <Border
+                        BorderBrush="Gray"
+                        BorderThickness="1">
+                        <Grid Margin="6">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <controls:CellPresenter 
+                                Value="{Binding DataSource[0], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="0"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                            <controls:CellPresenter 
+                                Grid.Column="1"
+                                Value="{Binding DataSource[1], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="1"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                            <controls:CellPresenter 
+                                Grid.Column="2"
+                                Value="{Binding DataSource[2], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="2"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                            
+                            <controls:CellPresenter 
+                                Grid.Row="1"
+                                Value="{Binding DataSource[3], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="3"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                            <controls:CellPresenter 
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Value="{Binding DataSource[4], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="4"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                            <controls:CellPresenter 
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Value="{Binding DataSource[5], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="5"
+                                Command="{TemplateBinding MoveCellCommand}" />
+
+                            <controls:CellPresenter 
+                                Grid.Row="2"
+                                Value="{Binding DataSource[6], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="6"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                            <controls:CellPresenter 
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Value="{Binding DataSource[7], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="7"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                            <controls:CellPresenter 
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Value="{Binding DataSource[8], Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                Index="8"
+                                Command="{TemplateBinding MoveCellCommand}" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

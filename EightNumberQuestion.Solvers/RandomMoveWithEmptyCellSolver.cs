@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EightNumberQuestion
+namespace EightNumberQuestion.Solvers
 {
-	public sealed class RandomMoveSolver : RandomSolver
+	public sealed class RandomMoveWithEmptyCellSolver : RandomSolver
 	{
 		protected override void TrySolve(Board board)
 		{
@@ -16,21 +16,22 @@ namespace EightNumberQuestion
 			long counter = 0;
 			while (!board.IsSolved & counter++ < maxRetryCount)
 			{
-				getTwoDiffIndex(out sourceIndex, out targetIndex);
+				targetIndex = board.EmptyCellIndex;
+				sourceIndex = getAnotherIndex(targetIndex);
 				board.TryMove(sourceIndex, targetIndex);
 			}
 		}
 
-		private void getTwoDiffIndex(out int index1, out int index2)
+		private int getAnotherIndex(int emptyIndex)
 		{
 			var rnd = this.rnd;
 
-			index1 = rnd.Next(Board.MinValue, Board.LEN);
-			index2 = index1;
+			int otherIndex;
 			do
 			{
-				index2 = rnd.Next(Board.MinValue, Board.LEN);
-			} while (index1 == index2);
+				otherIndex = rnd.Next(Board.MinValue, Board.LEN);
+			} while (emptyIndex == otherIndex);
+			return otherIndex;
 		}
 	}
 }

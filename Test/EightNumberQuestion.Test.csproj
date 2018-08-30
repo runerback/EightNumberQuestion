@@ -53,13 +53,13 @@
     <Compile Include="BasicUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EightNumberQuestion\EightNumberQuestion.csproj">
-      <Project>{a7c9f18f-0df9-4e9f-a74d-8d37d025eb52}</Project>
-      <Name>EightNumberQuestion</Name>
-    </ProjectReference>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <ProjectReference Include="..\EightNumberQuestion.Definitions\EightNumberQuestion.Definitions.csproj">
+      <Project>{dcc23a9b-8901-4838-86bd-00410cd3265d}</Project>
+      <Name>EightNumberQuestion.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
