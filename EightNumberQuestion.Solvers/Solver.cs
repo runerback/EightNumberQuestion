@@ -2,29 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EightNumberQuestion.Solvers
 {
 	public abstract class Solver
 	{
-		public bool Solve(Board board)
+		public async Task<bool> Solve(Board board, CancellationToken cancellationToken)
 		{
 			if (board == null)
 				throw new ArgumentNullException("board");
+			if (cancellationToken == null)
+				throw new ArgumentNullException("cancellationToken");
 			if (board.IsSolved)
 				return true;
 
-			Console.WriteLine("Initial state");
-			Console.WriteLine(board.ToString());
+			var maxCost = board.GetTotalManhattanDistance();
 
-			int maxCost = board.GetTotalManhattanDistance();
-			board.ResetCountSteps();
-
-			TrySolve(board);
-
+			var solved = await SolveInTask(board, cancellationToken);
+			
+			Console.WriteLine();
 			Console.WriteLine(board.SolveStepsInfo.Summary);
-			if (board.IsSolved)
+
+			if (solved)
 			{
 				Console.WriteLine("Solved");
 				if (board.SolveStepsInfo.TotalStepCount > maxCost)
@@ -38,10 +39,19 @@ namespace EightNumberQuestion.Solvers
 			}
 		}
 
+		private async Task<bool> SolveInTask(Board board, CancellationToken cancellationToken)
+		{
+			await Task.Run(() =>
+				TrySolve(board, cancellationToken),
+				cancellationToken);
+
+			return board.IsSolved;
+		}
+
 		/// <summary>
 		/// try to solve a eight number question
 		/// </summary>
 		/// <param name="board">eight number question data</param>
-		protected abstract void TrySolve(Board board);
+		protected abstract void TrySolve(Board board, CancellationToken cancellationToken);
 	}
 }

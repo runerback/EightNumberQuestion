@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace EightNumberQuestion.Solvers
 {
-	public sealed class ReliableMoveAndReduceHSolver : ReliableSolver
+	public sealed class ReliableMoveAndReduceHCostSolver : ReliableSolver
 	{
 		protected override int getCost(int sourceIndex, Board board)
 		{
 			var goalIndex = board[sourceIndex] - 1;
-			return Tool.GetManhattanDistance(board.EmptyCellIndex, goalIndex, Board.SIZE);
+			return Tool.GetManhattanDistance(sourceIndex, goalIndex, Board.SIZE);
 		}
 	}
 }

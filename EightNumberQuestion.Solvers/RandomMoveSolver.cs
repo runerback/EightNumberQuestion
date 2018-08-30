@@ -8,7 +8,7 @@ namespace EightNumberQuestion.Solvers
 {
 	public sealed class RandomMoveSolver : RandomSolver
 	{
-		protected override void TrySolve(Board board)
+		protected override void TrySolve(Board board, System.Threading.CancellationToken cancellationToken)
 		{
 			var maxRetryCount = MaxRetryCount;
 
@@ -16,6 +16,8 @@ namespace EightNumberQuestion.Solvers
 			long counter = 0;
 			while (!board.IsSolved & counter++ < maxRetryCount)
 			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
 				getTwoDiffIndex(out sourceIndex, out targetIndex);
 				board.TryMove(sourceIndex, targetIndex);
 			}

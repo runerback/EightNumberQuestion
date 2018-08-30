@@ -41,10 +41,14 @@
   <ItemGroup>
     <Compile Include="RandomMoveSolver.cs" />
     <Compile Include="RandomMoveWithEmptyCellSolver.cs" />
-    <Compile Include="RandomReliableMoveAndReduceHSolver.cs" />
+    <Compile Include="RandomReliableMoveAndReduceHSolver.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="RandomReliableMoveSolver.cs" />
     <Compile Include="RandomSolver.cs" />
+    <Compile Include="ReliableMoveAndReduceHCostSolver.cs" />
     <Compile Include="ReliableMoveAndReduceHSolver.cs" />
+    <Compile Include="ReliableSolver.cs" />
     <Compile Include="Solver.cs" />
   </ItemGroup>
   <ItemGroup>

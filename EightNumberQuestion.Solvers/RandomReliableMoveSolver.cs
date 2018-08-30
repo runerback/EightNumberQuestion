@@ -8,7 +8,7 @@ namespace EightNumberQuestion.Solvers
 {
 	public sealed class RandomReliableMoveSolver : RandomSolver
 	{
-		protected override void TrySolve(Board board)
+		protected override void TrySolve(Board board, System.Threading.CancellationToken cancellationToken)
 		{
 			var maxRetryCount = MaxRetryCount;
 
@@ -16,38 +16,25 @@ namespace EightNumberQuestion.Solvers
 			long counter = 0;
 			while (!board.IsSolved & counter++ < maxRetryCount)
 			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
 				targetIndex = board.EmptyCellIndex;
 				sourceIndex = getAnotherIndex(targetIndex);
 				if (!board.TryMove(sourceIndex, targetIndex))
 					throw new Exception("bad move");
+				lastMovedIndex = targetIndex;
 			}
 		}
 
+		private int lastMovedIndex = -1;
+
 		private int getAnotherIndex(int emptyIndex)
 		{
-			int[] moveableIndexes = new int[4]
-			{
-				emptyIndex - 3, //up
-				emptyIndex - 1, //left
-				emptyIndex + 1, //right
-				emptyIndex + 3 //down
-			};
-			switch (emptyIndex % 3)
-			{
-				case 0:
-					moveableIndexes[1] = -1;
-					break;
-				case 2:
-					moveableIndexes[2] = -1;
-					break;
-				default: break;
-			}
-
-			var filtered = moveableIndexes
-				.Where(item => item >= Board.MinValue && item < Board.LEN)
+			var moveableIndexes = Tool.GetAvaliableMoveIndex(emptyIndex, Board.SIZE)
+				.Where(item => item != lastMovedIndex)
 				.ToArray();
 
-			return filtered[this.rnd.Next(0, filtered.Length)];
+			return moveableIndexes[this.rnd.Next(0, moveableIndexes.Length)];
 		}
 	}
 }

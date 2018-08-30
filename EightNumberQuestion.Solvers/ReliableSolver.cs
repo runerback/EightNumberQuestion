@@ -6,36 +6,26 @@ using System.Threading.Tasks;
 
 namespace EightNumberQuestion.Solvers
 {
-	public sealed class RandomReliableMoveAndReduceHSolver : RandomSolver
+	public abstract class ReliableSolver : Solver
 	{
 		protected override void TrySolve(Board board, System.Threading.CancellationToken cancellationToken)
 		{
-			var maxRetryCount = MaxRetryCount;
-
 			int sourceIndex, targetIndex;
-			long counter = 0;
 			while (!board.IsSolved)
 			{
 				if (cancellationToken.IsCancellationRequested)
 					break;
 				targetIndex = board.EmptyCellIndex;
-				sourceIndex = getAnotherIndex(targetIndex);
-				int currentDistance = board.GetTotalManhattanDistance();
+				sourceIndex = getAnotherIndex(targetIndex, board);
 				if (!board.TryMove(sourceIndex, targetIndex))
 					throw new Exception("bad move");
-				int movedDistance = board.GetTotalManhattanDistance();
-				if (movedDistance >= currentDistance)
-					board.TryRevertLastStep();
-				else
-				{
-					Console.WriteLine(board.ToString());
-					if (counter++ == maxRetryCount)
-						break;
-				}
+				lastMovedIndex = targetIndex;
 			}
 		}
-		
-		private int getAnotherIndex(int emptyIndex)
+
+		private int lastMovedIndex = -1;
+
+		private int getAnotherIndex(int emptyIndex, Board board)
 		{
 			int[] moveableIndexes = new int[4]
 			{
@@ -55,11 +45,12 @@ namespace EightNumberQuestion.Solvers
 				default: break;
 			}
 
-			var filtered = moveableIndexes
-				.Where(item => item >= Board.MinValue && item < Board.LEN)
-				.ToArray();
-
-			return filtered[this.rnd.Next(0, filtered.Length)];
+			return Tool.GetAvaliableMoveIndex(emptyIndex, Board.SIZE)
+				.Where(item => item != lastMovedIndex)
+				.OrderBy(index => getCost(index, board))
+				.First();
 		}
+
+		protected abstract int getCost(int sourceIndex, Board board);
 	}
 }

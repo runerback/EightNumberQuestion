@@ -24,5 +24,12 @@ namespace EightNumberQuestion.Test
 			var emptyCellIndex = board.EmptyCellIndex;
 			board.TryMove(emptyCellIndex, Board.GetNextIndex(emptyCellIndex));
 		}
+
+		[TestMethod]
+		public void GetManhattanDistanceTest()
+		{
+			Assert.AreEqual(1, Tool.GetManhattanDistance(0, 1, 3));
+			Assert.AreEqual(3, Tool.GetManhattanDistance(0, 7, 3));
+		}
 	}
 }

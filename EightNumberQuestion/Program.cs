@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using EightNumberQuestion.Solvers;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace EightNumberQuestion
 {
@@ -15,32 +17,67 @@ namespace EightNumberQuestion
 		{
 			SetConsoleCtrlHandler(ConsoleStateCheck, true);
 
-			var originConsoleWriter = Console.Out;
-			var fs = new FileStream("log.txt", FileMode.Create);
-			var writer = new StreamWriter(fs);
-			Console.SetOut(writer);
+			//var originConsoleWriter = Console.Out;
+			//var fs = new FileStream("log.txt", FileMode.Create);
+			//var writer = new StreamWriter(fs);
+			//Console.SetOut(writer);
+			
+				var waitTime = TimeSpan.FromMinutes(1);
+			var cancellationTokenSource = new CancellationTokenSource(waitTime);
 
 			Closing += delegate
 			{
-				Console.SetOut(originConsoleWriter);
-				fs.Flush();
-				writer.Dispose();
-				fs.Dispose();
+			//	Console.SetOut(originConsoleWriter);
+			//	fs.Flush();
+			//	writer.Dispose();
+			//	fs.Dispose();
+				cancellationTokenSource.Dispose();
 			};
-
 			try
 			{
 				var board = new Board();
+
+				Console.WriteLine("Initial state");
+				Console.WriteLine(board.ToString());
+
+				board.ResetCountSteps();
+
 				var solvers = new Solver[]
 				{
-					new RandomMoveSolver(),
-					new RandomMoveWithEmptyCellSolver(),
 					new RandomReliableMoveSolver(),
-					new RandomReliableMoveAndReduceHSolver(),
 					new ReliableMoveAndReduceHSolver(),
+					new ReliableMoveAndReduceHCostSolver(),
 				};
 
-				solvers[4].Solve(board);
+				var exceptions = new ConcurrentQueue<Exception>();
+
+				using (cancellationTokenSource)
+				{
+					var cancellationToken = cancellationTokenSource.Token;
+
+					Parallel.ForEach(solvers, (solver, state) =>
+					{
+						solver.Solve(board.Copy(), cancellationToken)
+							.ContinueWith(t =>
+							{
+								if (t.IsFaulted)
+								{
+									foreach (var inner in t.Exception.InnerExceptions)
+										exceptions.Enqueue(inner);
+									return;
+								}
+
+								if (t.Result)
+								{
+									cancellationTokenSource.Cancel();
+									state.Stop();
+								}
+							}).Wait();
+					});
+				}
+
+				if (!exceptions.IsEmpty)
+					throw new AggregateException(exceptions).Flatten();
 			}
 			catch (Exception e)
 			{

@@ -8,9 +8,12 @@ namespace EightNumberQuestion
 {
 	public sealed class Board : IEnumerable<int>
 	{
-		public Board()
+		public Board() : this(true) { }
+
+		private Board(bool generate)
 		{
-			Reset();
+			if (generate)
+				Reset();
 		}
 
 		public const int LEN = 9;
@@ -88,7 +91,7 @@ namespace EightNumberQuestion
 
 			if (index == this.emptyIndex)
 				return 0;
-			return Tool.GetManhattanDistance(index, this.data[index] - 1, SIZE, SIZE);
+			return Tool.GetManhattanDistance(index, this.data[index] - 1, SIZE);
 		}
 
 		public int GetTotalManhattanDistance()
@@ -97,8 +100,13 @@ namespace EightNumberQuestion
 				.Sum(item => GetManhattanDistance(item));
 		}
 
-		private int IndexOf(int value)
+		public int IndexOf(int value)
 		{
+			if (value < 0 || value >= LEN - 1)
+				return -1;
+			if (value == 0)
+				return emptyIndex;
+
 			var data = this.data;
 			for (int i = 0, j = LEN; i < j; i++)
 			{
@@ -213,6 +221,22 @@ namespace EightNumberQuestion
 		public void ResetCountSteps()
 		{
 			this.counter.Reset();
+		}
+
+		public Board Copy()
+		{
+			var copied = new Board(false);
+
+			copied.emptyIndex = this.emptyIndex;
+
+			var sourceData = this.data;
+			var targetData = copied.data;
+			for (int i = MinValue, j = LEN; i < j; i++)
+			{
+				targetData[i] = sourceData[i];
+			}
+
+			return copied;
 		}
 
 		public IEnumerator<int> GetEnumerator()
