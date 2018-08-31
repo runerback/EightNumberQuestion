@@ -7,82 +7,82 @@ using System.Threading.Tasks.Dataflow;
 
 namespace EightNumberQuestion.Solvers
 {
-	public sealed class TreeSolver : Solver
+	public class TreeSolver : Solver
 	{
 		protected override void TrySolve(Board board, System.Threading.CancellationToken cancellationToken)
 		{
 			var rootBranch = new BoardBranch(board);
 
-			var branches = new TransformManyBlock<BoardBranch, BoardBranch>(
-				data => data,
-				new ExecutionDataflowBlockOptions
-				{
-					CancellationToken = cancellationToken
-				});
-
-			var solver = new TransformBlock<BoardBranch, BoardBranchSolveResult>(
-				branch => branch.Solve(),
-				new ExecutionDataflowBlockOptions
-				{
-					CancellationToken = cancellationToken
-				});
+            var solverBlock = new TransformBlock<BoardBranch, BoardBranchSolveResult>(
+                branch => branch.Solve(),
+                new ExecutionDataflowBlockOptions
+                {
+                    CancellationToken = cancellationToken,
+                    BoundedCapacity = 10,
+                    MaxDegreeOfParallelism = 3,
+                    SingleProducerConstrained = true
+                });
 
 			var checker = new ActionBlock<BoardBranchSolveResult>(result =>
 			{
-				var branch = result.Branch;
-				Console.WriteLine(branch.ToString());
+                var branch = result.Branch;
+                if(board.EmptyCellIndex == 4)
+                    Console.WriteLine(branch.ToString());
 
 				if (result.Solved)
-					branches.Complete(); //always can solve, branch count of each step count is const
+					solverBlock.Complete(); //always can solve, branch count of each step count is const
 				else
-					branches.Post(branch);
+					foreach(var innerBranch in branch.GetBranches(GetCost))
+						solverBlock.Post(innerBranch);
+				result.Dispose();
+				result = null;
 			},
 			new ExecutionDataflowBlockOptions
 			{
 				CancellationToken = cancellationToken
 			});
 
-			var solverLink = branches.LinkTo(solver);
-			branches.Completion.ContinueWith(t =>
-			{
-				solver.Complete();
-				solverLink.Dispose();
-			});
-
-			var checkerLink = solver.LinkTo(checker);
-			solver.Completion.ContinueWith(t =>
+			var checkerLink = solverBlock.LinkTo(checker);
+			solverBlock.Completion.ContinueWith(t =>
 			{
 				checker.Complete();
 				checkerLink.Dispose();
 			});
 
-			branches.Post(rootBranch);
+			foreach(var branch1 in rootBranch.GetBranches(GetCost))
+				solverBlock.Post(branch1);
+			rootBranch.Dispose();
+            rootBranch = null;
 
 			checker.Completion.Wait();
 		}
 
-		sealed class BoardBranch : IEnumerable<BoardBranch>
+        protected virtual int GetCost(int sourceIndex, int targetIndex, int goalIndex)
+        {
+            return 1;
+        }
+
+		sealed class BoardBranch : IDisposable
 		{
 			//initial state
 			public BoardBranch(Board board)
-				: this(board, -1, -1, new BranchInfo())
+				: this(board, -1, -1)
 			{
 				this.isRoot = true;
 			}
 
 			//branches
-			private BoardBranch(Board board, int sourceIndex, int targetIndex, BranchInfo branchInfo)
+			private BoardBranch(Board board, int sourceIndex, int targetIndex)
 			{
 				if (board == null)
 					throw new ArgumentNullException("board");
-				this.board = board;//.Copy(true);
-				this.sourceIndex = sourceIndex;
+				this.board = board;
+                this.sourceIndex = sourceIndex;
 				this.targetIndex = targetIndex;
-				this.info = branchInfo;
-			}
+                this.boardInfo = board.ToString();
+            }
 
-			private readonly Board board;
-			private readonly BranchInfo info;
+			private Board board;
 
 			private readonly int sourceIndex;
 			private readonly int targetIndex;
@@ -99,41 +99,51 @@ namespace EightNumberQuestion.Solvers
 				return new BoardBranchSolveResult(this, board.IsSolved);
 			}
 
-			public IEnumerator<BoardBranch> GetEnumerator()
-			{
-				var board = this.board;
-				var branchInfo = this.info;
-				var targetIndex = board.EmptyCellIndex;
+            public IEnumerable<BoardBranch> GetBranches(Func<int, int, int, int> cost)
+            {
+                if (cost == null)
+                    throw new ArgumentNullException("cost");
 
-				return Tool.GetAvaliableMoveIndex(targetIndex, Board.SIZE)
-					.Where(item => item != branchInfo.LastTargetIndex)
-					.Select(item => new BoardBranch(board.Copy(true), item, targetIndex, new BranchInfo(branchInfo, item, targetIndex)))
-					.GetEnumerator();
-			}
+                var board = this.board;
+                var targetIndex = board.EmptyCellIndex;
 
-			System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			{
-				return GetEnumerator();
-			}
+                return Tool.GetAvaliableMoveIndex(targetIndex, Board.SIZE)
+                    .Where(item => item != this.targetIndex)
+                    .OrderBy(item => cost(item, targetIndex, board.GetGoalIndex(item)))
+                    .Select(item => new BoardBranch(
+                        board.Copy(true),
+                        item,
+                        targetIndex))
+                    .Take(1);
+            }
 
+            private string boardInfo;
 			public override string ToString()
 			{
-				return string.Format("[{0}]\r\n{1}", this.info.Indexes, this.board.ToString());
-			}
+                return this.boardInfo;
 
-			sealed class BranchInfo
+            }
+
+            public void Dispose()
+            {
+                this.board = null;
+                this.boardInfo = null;
+            }
+
+            [Obsolete("this need more and more memory")]
+			sealed class BranchInfo : IDisposable
 			{
 				public BranchInfo() { }
 
 				public BranchInfo(BranchInfo previousBranch, int sourceIndex, int lastTargetIndex)
 				{
-					if (previousBranch == null)
-						throw new ArgumentNullException("previousBranch");
-					this.indexes = string.Format("{0}{1}", previousBranch.indexes, sourceIndex);
-					this.lastTargetIndex = lastTargetIndex;
+                    if (previousBranch == null)
+                        throw new ArgumentNullException("previousBranch");
+                    this.indexes = previousBranch.indexes + sourceIndex.ToString(); //this one eat memory
+                    this.lastTargetIndex = lastTargetIndex;
 				}
 
-				private readonly string indexes = null;
+				private string indexes = null;
 				public string Indexes
 				{
 					get { return indexes; }
@@ -149,10 +159,15 @@ namespace EightNumberQuestion.Solvers
 				{
 					return indexes ?? "root";
 				}
-			}
+
+                public void Dispose()
+                {
+                    this.indexes = null;
+                }
+            }
 		}
 
-		sealed class BoardBranchSolveResult
+		sealed class BoardBranchSolveResult : IDisposable
 		{
 			public BoardBranchSolveResult(BoardBranch branch, bool solved)
 			{
@@ -162,7 +177,7 @@ namespace EightNumberQuestion.Solvers
 				this.solved = solved;
 			}
 
-			private readonly BoardBranch branch;
+			private BoardBranch branch;
 			public BoardBranch Branch
 			{
 				get { return this.branch; }
@@ -172,6 +187,12 @@ namespace EightNumberQuestion.Solvers
 			public bool Solved
 			{
 				get { return solved; }
+			}
+
+			public void Dispose()
+			{
+				this.branch.Dispose();
+				this.branch = null;
 			}
 		}
 	}

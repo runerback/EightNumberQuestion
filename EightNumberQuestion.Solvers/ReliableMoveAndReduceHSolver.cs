@@ -10,7 +10,7 @@ namespace EightNumberQuestion.Solvers
 	{
 		protected override int getCost(int sourceIndex, Board board)
 		{
-			var goalIndex = board[sourceIndex] - 1;
+            var goalIndex = board.GetGoalIndex(sourceIndex);
 			return Tool.GetManhattanDistance(board.EmptyCellIndex, goalIndex, Board.SIZE);
 		}
 	}

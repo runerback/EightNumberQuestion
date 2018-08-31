@@ -55,6 +55,7 @@
     <Compile Include="ReliableSolver.cs" />
     <Compile Include="Solver.cs" />
     <Compile Include="TreeSolver.cs" />
+    <Compile Include="TreeSolverWithReduceCost.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EightNumberQuestion.Definitions\EightNumberQuestion.Definitions.csproj">

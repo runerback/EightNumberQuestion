@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EightNumberQuestion
 {
-	public sealed class Board : IEnumerable<int>
+	public sealed class Board : IEnumerable<byte>
 	{
 		public Board() : this(true) { }
 
@@ -20,7 +20,7 @@ namespace EightNumberQuestion
 		public const int SIZE = 3;
 		public const int MinValue = 0;
 		public const int GOAL = 0;
-		private readonly int[] data = new int[LEN];
+		private readonly byte[] data = new byte[LEN];
 
 		public void Reset()
 		{
@@ -52,7 +52,7 @@ namespace EightNumberQuestion
 					if (indexIterator.Current == emptyIndex)
 						if (!indexIterator.MoveNext())
 							break;
-					data[indexIterator.Current] = valueIterator.Current;
+					data[indexIterator.Current] = (byte)valueIterator.Current;
 				}
 			}
 			data[emptyIndex] = 0;
@@ -116,6 +116,14 @@ namespace EightNumberQuestion
 			throw new InvalidOperationException("value no find. " + value);
 		}
 
+        public int GetGoalIndex(int index)
+        {
+            checkIndex(index);
+            if (index == this.emptyIndex)
+                throw new ArgumentException("index. empty cell index");
+            return data[index] - 1;
+        }
+
 		public int this[int index]
 		{
 			get
@@ -161,7 +169,7 @@ namespace EightNumberQuestion
 
 				int sourceValue = data[sourceIndex];
 				data[sourceIndex] = data[targetIndex];
-				data[targetIndex] = sourceValue;
+				data[targetIndex] = (byte)sourceValue;
 
 				emptyIndex = sourceIndex;
 
@@ -258,7 +266,7 @@ namespace EightNumberQuestion
 			return copied;
 		}
 
-		public IEnumerator<int> GetEnumerator()
+		public IEnumerator<byte> GetEnumerator()
 		{
 			return data.AsEnumerable().GetEnumerator();
 		}
