@@ -137,6 +137,20 @@ namespace EightNumberQuestion
 			get { return emptyIndex; }
 		}
 
+		private bool recordLastStep = false;
+		public bool RecordLastStep
+		{
+			get { return recordLastStep; }
+			set
+			{
+				if (value != recordLastStep)
+				{
+					recordLastStep = value;
+					if (!value)
+						stepRecorder.Reset();
+				}
+			}
+		}
 		private readonly StepRecorder stepRecorder = new StepRecorder();
 
 		public bool TryMove(int sourceIndex, int targetIndex)
@@ -151,7 +165,8 @@ namespace EightNumberQuestion
 
 				emptyIndex = sourceIndex;
 
-				this.stepRecorder.RecordLastSucceedStep(new MoveStep(sourceIndex, targetIndex));
+				if(recordLastStep)
+					this.stepRecorder.RecordLastSucceedStep(new MoveStep(sourceIndex, targetIndex));
 				this.counter.Succeed();
 
 				if (GetTotalManhattanDistance() == 0)
@@ -223,11 +238,12 @@ namespace EightNumberQuestion
 			this.counter.Reset();
 		}
 
-		public Board Copy()
+		public Board Copy(bool copyStepCount = false)
 		{
 			var copied = new Board(false);
 
 			copied.emptyIndex = this.emptyIndex;
+			copied.recordLastStep = this.recordLastStep;
 
 			var sourceData = this.data;
 			var targetData = copied.data;
@@ -235,6 +251,9 @@ namespace EightNumberQuestion
 			{
 				targetData[i] = sourceData[i];
 			}
+
+			if (copyStepCount)
+				copied.counter.UpdateBy(this.counter);
 
 			return copied;
 		}

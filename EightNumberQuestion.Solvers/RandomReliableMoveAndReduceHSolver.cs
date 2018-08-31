@@ -10,10 +10,13 @@ namespace EightNumberQuestion.Solvers
 	{
 		protected override void TrySolve(Board board, System.Threading.CancellationToken cancellationToken)
 		{
+			board.RecordLastStep = true;
+
 			var maxRetryCount = MaxRetryCount;
 
 			int sourceIndex, targetIndex;
 			long counter = 0;
+
 			while (!board.IsSolved)
 			{
 				if (cancellationToken.IsCancellationRequested)

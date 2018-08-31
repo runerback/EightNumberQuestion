@@ -20,17 +20,18 @@ namespace EightNumberQuestion
 			//var originConsoleWriter = Console.Out;
 			//var fs = new FileStream("log.txt", FileMode.Create);
 			//var writer = new StreamWriter(fs);
+			//writer.AutoFlush = true;
 			//Console.SetOut(writer);
-			
-				var waitTime = TimeSpan.FromMinutes(1);
-			var cancellationTokenSource = new CancellationTokenSource(waitTime);
+
+			var waitTime = TimeSpan.FromMinutes(1);
+			var cancellationTokenSource = new CancellationTokenSource();
 
 			Closing += delegate
 			{
-			//	Console.SetOut(originConsoleWriter);
-			//	fs.Flush();
-			//	writer.Dispose();
-			//	fs.Dispose();
+				//Console.SetOut(originConsoleWriter);
+				//fs.Flush();
+				//writer.Dispose();
+				//fs.Dispose();
 				cancellationTokenSource.Dispose();
 			};
 			try
@@ -44,9 +45,10 @@ namespace EightNumberQuestion
 
 				var solvers = new Solver[]
 				{
-					new RandomReliableMoveSolver(),
-					new ReliableMoveAndReduceHSolver(),
-					new ReliableMoveAndReduceHCostSolver(),
+					//new RandomReliableMoveSolver(),
+					//new ReliableMoveAndReduceHSolver(),
+					//new ReliableMoveAndReduceHCostSolver(),
+					new TreeSolver(),
 				};
 
 				var exceptions = new ConcurrentQueue<Exception>();

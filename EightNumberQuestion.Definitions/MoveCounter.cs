@@ -76,6 +76,16 @@ namespace EightNumberQuestion
 		{
 			return buildSummary();
 		}
+
+		public void UpdateBy(MoveCounter other)
+		{
+			if (other == null)
+				throw new ArgumentNullException("other");
+
+			this.totalStepCount = other.totalStepCount;
+			this.successedStepCount = other.successedStepCount;
+			this.failedStepCount = other.failedStepCount;
+		}
 	}
 
 }

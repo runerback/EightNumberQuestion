@@ -32,6 +32,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.9.0\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,6 +54,7 @@
     <Compile Include="ReliableMoveAndReduceHSolver.cs" />
     <Compile Include="ReliableSolver.cs" />
     <Compile Include="Solver.cs" />
+    <Compile Include="TreeSolver.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EightNumberQuestion.Definitions\EightNumberQuestion.Definitions.csproj">
